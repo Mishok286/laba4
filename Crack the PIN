@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <string.h>
+#include <openssl/md5.h>
+
+void crack(char *hash, char *expected) {
+    char pin[6];
+    unsigned char digest[MD5_DIGEST_LENGTH];
+    char md5string[33];
+
+    // Перебір від "00000" до "99999"
+    for (int i = 0; i < 100000; i++) {
+        snprintf(pin, sizeof(pin), "%05d", i);  // Створення 5-значного PIN-коду
+
+        // Використання MD5 для створення хешу від поточного PIN
+        MD5((unsigned char*)&pin, strlen(pin), (unsigned char*)&digest);
+
+        // Перетворення MD5 в рядок (hex формат для порівняння)
+        for(int j = 0; j < 16; j++)
+            sprintf(&md5string[j*2], "%02x", (unsigned int)digest[j]);
+
+        // Перевірка, чи збігається отриманий хеш із потрібним
+        if (strcmp(md5string, hash) == 0) {
+            strcpy(expected, pin);  // Якщо знайдено, збережіть результат
+            return;
+        }
+    }
+}
